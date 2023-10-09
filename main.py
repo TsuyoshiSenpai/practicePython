@@ -5,63 +5,35 @@ from player import Player
 from enemy import Enemy
 from databasemanager import DatabaseManager
 
-pygame.init()
-
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-
-db_manager = DatabaseManager("scores.db")
-db_manager.connect()
-db_manager.create_scores_table() # Создание таблицы, если она не существует
-
-font = pygame.font.Font(None, 36)
-
-# Создание окна игры
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("PyMy крысу")
-
-# Время начала игры (в миллисекундах)
-start_time = pygame.time.get_ticks()
-
-# Продолжительность игры (в миллисекундах)
-game_duration = 60000
-
-# Загрузка изображения заднего фона
-background = pygame.image.load("images/background.png")
-
-player = Player()
-
-score = 0
-game_over = False
-
-# Запрос имени пользователя
-text = "Введите имя"
-input_active = True  # Флаг активности поля ввода
-
 # Правила игры
-rule1 = "1. Введите имя персонажа и нажмите Enter."
-rule2 = "2. Управление персонажем на стрелочки."
-rule3 = "3. За отведенное время нужно есть мышей."
-rule4 = "4. Если съедите меньше тридцати, то проиграете."
-rule5 = "5. Больше двигайтесь."
-rule1_surface = font.render(rule1, True, (255, 255, 255))
-rule1_rect = pygame.Rect(170, 200, 500, 36)
-rule2_surface = font.render(rule2, True, (255, 255, 255))
-rule2_rect = pygame.Rect(170, 250, 500, 36)
-rule3_surface = font.render(rule3, True, (255, 255, 255))
-rule3_rect = pygame.Rect(170, 300, 500, 36)
-rule4_surface = font.render(rule4, True, (255, 255, 255))
-rule4_rect = pygame.Rect(170, 350, 500, 36)
-rule5_surface = font.render(rule5, True, (255, 255, 255))
-rule5_rect = pygame.Rect(170, 400, 500, 36)
+def rulesInit():
+    rule1 = "1. Введите имя персонажа и нажмите Enter."
+    rule2 = "2. Управление персонажем на стрелочки."
+    rule3 = "3. За отведенное время нужно есть мышей."
+    rule4 = "4. Если съедите меньше тридцати, то проиграете."
+    rule5 = "5. Больше двигайтесь."
+    global rule1_surface
+    global rule1_rect
+    global rule2_surface
+    global rule2_rect
+    global rule3_surface
+    global rule3_rect
+    global rule4_surface
+    global rule4_rect
+    global rule5_surface
+    global rule5_rect
+    rule1_surface = font.render(rule1, True, (255, 255, 255))
+    rule1_rect = pygame.Rect(170, 200, 500, 36)
+    rule2_surface = font.render(rule2, True, (255, 255, 255))
+    rule2_rect = pygame.Rect(170, 250, 500, 36)
+    rule3_surface = font.render(rule3, True, (255, 255, 255))
+    rule3_rect = pygame.Rect(170, 300, 500, 36)
+    rule4_surface = font.render(rule4, True, (255, 255, 255))
+    rule4_rect = pygame.Rect(170, 350, 500, 36)
+    rule5_surface = font.render(rule5, True, (255, 255, 255))
+    rule5_rect = pygame.Rect(170, 400, 500, 36)
 
-# Создание группы спрайтов для врагов
-enemies = pygame.sprite.Group()
-
-# Основной игровой цикл
-running = True
-clock = pygame.time.Clock()
-
+# Отображение результата
 def show_result_message(message, top_players):
     result_font = pygame.font.Font(None, 36)
     result_text = result_font.render(message, True, (255, 255, 255))
@@ -94,7 +66,74 @@ def show_result_message(message, top_players):
                 if event.key == pygame.K_RETURN:
                     waiting_for_key = False
 
-while input_active:
+# Инициализация
+def initialize():
+
+    global SCREEN_WIDTH
+    global SCREEN_HEIGHT
+    global running
+    global clock
+    global enemies
+    global db_manager
+    global font
+    global screen
+    global start_time
+    global game_duration
+    global background
+    global player
+    global score
+    global game_over
+    global text
+    global input_active
+
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 600
+
+    # Основной игровой цикл
+    running = True
+    clock = pygame.time.Clock()
+
+    # Создание группы спрайтов для врагов
+    enemies = pygame.sprite.Group()
+
+    db_manager = DatabaseManager("scores.db")
+    db_manager.connect()
+    db_manager.create_scores_table() # Создание таблицы, если она не существует
+
+    font = pygame.font.Font(None, 36)
+    # Создание окна игры
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("PyMy крысу")
+
+    # Время начала игры (в миллисекундах)
+    start_time = pygame.time.get_ticks()
+
+    # Продолжительность игры (в миллисекундах)
+    game_duration = 60000
+
+    # Загрузка изображения заднего фона
+    background = pygame.image.load("images/background.png")
+
+    player = Player()
+
+    score = 0
+    game_over = False
+
+    # Запрос имени пользователя
+    text = "Введите имя"
+    input_active = True  # Флаг активности поля ввода
+
+# Ожидание ввода имени
+def waitingForInput():
+
+    global input_active
+    global spawn_enemies
+    global text_surface
+    global input_rect
+    global screen
+    global clock
+    global text
+
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
@@ -131,7 +170,15 @@ while input_active:
     # Ограничение частоты обновления экрана
     clock.tick(60)
 
-while running:
+# Основной цикл
+def run():
+
+    global running
+    global score
+    global game_over
+    global start_time
+    global text
+    global input_active
 
     current_time = pygame.time.get_ticks()  # Получение текущего времени
 
@@ -245,6 +292,18 @@ while running:
 
     # Ограничение частоты обновления экрана
     clock.tick(60)
+
+pygame.init()
+
+initialize()
+
+rulesInit()
+
+while input_active:
+    waitingForInput()
+
+while running:
+    run()
 
 
 # Завершение PyGame

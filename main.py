@@ -4,7 +4,6 @@ import pygame.time
 from player import Player
 from enemy import Enemy
 from databasemanager import DatabaseManager
-from game import Game
 from variables import Variables
 
 var = Variables()

@@ -4,53 +4,47 @@ import pygame.time
 from player import Player
 from enemy import Enemy
 from databasemanager import DatabaseManager
+from game import Game
+from variables import Variables
+
+var = Variables()
 
 # Правила игры
-def rulesInit():
+def rulesInit(var):
     rule1 = "1. Введите имя персонажа и нажмите Enter."
     rule2 = "2. Управление персонажем на стрелочки."
     rule3 = "3. За отведенное время нужно есть мышей."
     rule4 = "4. Если съедите меньше тридцати, то проиграете."
     rule5 = "5. Больше двигайтесь."
-    global rule1_surface
-    global rule1_rect
-    global rule2_surface
-    global rule2_rect
-    global rule3_surface
-    global rule3_rect
-    global rule4_surface
-    global rule4_rect
-    global rule5_surface
-    global rule5_rect
-    rule1_surface = font.render(rule1, True, (255, 255, 255))
-    rule1_rect = pygame.Rect(170, 200, 500, 36)
-    rule2_surface = font.render(rule2, True, (255, 255, 255))
-    rule2_rect = pygame.Rect(170, 250, 500, 36)
-    rule3_surface = font.render(rule3, True, (255, 255, 255))
-    rule3_rect = pygame.Rect(170, 300, 500, 36)
-    rule4_surface = font.render(rule4, True, (255, 255, 255))
-    rule4_rect = pygame.Rect(170, 350, 500, 36)
-    rule5_surface = font.render(rule5, True, (255, 255, 255))
-    rule5_rect = pygame.Rect(170, 400, 500, 36)
+    var.rule1_surface = var.font.render(rule1, True, (255, 255, 255))
+    var.rule1_rect = pygame.Rect(170, 200, 500, 36)
+    var.rule2_surface = var.font.render(rule2, True, (255, 255, 255))
+    var.rule2_rect = pygame.Rect(170, 250, 500, 36)
+    var.rule3_surface = var.font.render(rule3, True, (255, 255, 255))
+    var.rule3_rect = pygame.Rect(170, 300, 500, 36)
+    var.rule4_surface = var.font.render(rule4, True, (255, 255, 255))
+    var.rule4_rect = pygame.Rect(170, 350, 500, 36)
+    var.rule5_surface = var.font.render(rule5, True, (255, 255, 255))
+    var.rule5_rect = pygame.Rect(170, 400, 500, 36)
 
 # Отображение результата
 def show_result_message(message, top_players):
     result_font = pygame.font.Font(None, 36)
     result_text = result_font.render(message, True, (255, 255, 255))
-    result_rect = result_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))  # Центрирование текста
+    result_rect = result_text.get_rect(center=(var.SCREEN_WIDTH // 2, var.SCREEN_HEIGHT // 2))  # Центрирование текста
 
     # Очистка экрана
-    screen.fill((0, 0, 0))
+    var.screen.fill((0, 0, 0))
 
     # Отображение сообщения на экране
-    screen.blit(result_text, result_rect)
+    var.screen.blit(result_text, result_rect)
 
     # Отображение списка топ-5 игроков
     y_offset = result_rect.bottom + 20  # Начальная вертикальная позиция для списка игроков
     for rank, (player_name, player_score) in enumerate(top_players, start=1):
         player_text = result_font.render(f"{rank}. {player_name}: {player_score}", True, (255, 255, 255))
-        player_rect = player_text.get_rect(center=(SCREEN_WIDTH // 2, y_offset))
-        screen.blit(player_text, player_rect)
+        player_rect = player_text.get_rect(center=(var.SCREEN_WIDTH // 2, y_offset))
+        var.screen.blit(player_text, player_rect)
         y_offset += player_rect.height + 10  # Увеличиваем вертикальную позицию для следующего игрока
 
     # Обновление экрана
@@ -67,241 +61,211 @@ def show_result_message(message, top_players):
                     waiting_for_key = False
 
 # Инициализация
-def initialize():
+def initialize(var):
 
-    global SCREEN_WIDTH
-    global SCREEN_HEIGHT
-    global running
-    global clock
-    global font
-    global screen
-    global start_time
-    global game_duration
-    global background
-    global player
-    global score
-    global game_over
-    global text
-    global input_active
-
-    SCREEN_WIDTH = 800
-    SCREEN_HEIGHT = 600
+    var.SCREEN_WIDTH = 800
+    var.SCREEN_HEIGHT = 600
 
     # Основной игровой цикл
-    running = True
-    clock = pygame.time.Clock()
+    var.running = True
+    var.clock = pygame.time.Clock()
 
     # Создание группы спрайтов для врагов
-    enemies = pygame.sprite.Group()
+    var.enemies = pygame.sprite.Group()
 
-    db_manager = DatabaseManager("scores.db")
-    db_manager.connect()
-    db_manager.create_scores_table() # Создание таблицы, если она не существует
+    var.db_manager = DatabaseManager("scores.db")
+    var.db_manager.connect()
+    var.db_manager.create_scores_table() # Создание таблицы, если она не существует
 
-    font = pygame.font.Font(None, 36)
+    var.font = pygame.font.Font(None, 36)
     # Создание окна игры
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    var.screen = pygame.display.set_mode((var.SCREEN_WIDTH, var.SCREEN_HEIGHT))
     pygame.display.set_caption("PyMy крысу")
 
     # Время начала игры (в миллисекундах)
-    start_time = pygame.time.get_ticks()
+    var.start_time = pygame.time.get_ticks()
 
     # Продолжительность игры (в миллисекундах)
-    game_duration = 60000
+    var.game_duration = 60000
 
     # Загрузка изображения заднего фона
-    background = pygame.image.load("images/background.png")
+    var.background = pygame.image.load("images/background.png")
 
-    player = Player()
+    var.player = Player()
 
-    score = 0
-    game_over = False
+    var.score = 0
+    var.game_over = False
 
     # Запрос имени пользователя
-    text = "Введите имя"
-    input_active = True  # Флаг активности поля ввода
+    var.text = "Введите имя"
+    var.input_active = True  # Флаг активности поля ввода
 
 # Ожидание ввода имени
-def waitingForInput():
-
-    global input_active
-    global spawn_enemies
-    global text_surface
-    global input_rect
-    global screen
-    global clock
-    global text
+def waitingForInput(var):
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                if text.strip() != "":
-                    input_active = False
-                    spawn_enemies = True
+                if var.text.strip() != "":
+                    var.input_active = False
+                    var.spawn_enemies = True
             elif event.key == pygame.K_BACKSPACE:
-                text = text[:-1]
+                var.text = var.text[:-1]
             else:
-                text += event.unicode
+                var.text += event.unicode
 
     # Очистка экрана
-    screen.fill((0, 0, 0))
+    var.screen.fill((0, 0, 0))
 
     # Отображение заднего фона
-    screen.blit(background, (0, 0))
+    var.screen.blit(var.background, (0, 0))
 
     # Отображение поля ввода имени
-    text_surface = font.render(text, True, (255, 255, 255))
-    input_rect = pygame.Rect(50, 50, 200, 36)  # Позиция и размер поля ввода
-    pygame.draw.rect(screen, (255, 255, 255), input_rect, 2)
-    screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
+    var.text_surface = var.font.render(var.text, True, (255, 255, 255))
+    var.input_rect = pygame.Rect(50, 50, 200, 36)  # Позиция и размер поля ввода
+    pygame.draw.rect(var.screen, (255, 255, 255), var.input_rect, 2)
+    var.screen.blit(var.text_surface, (var.input_rect.x + 5, var.input_rect.y + 5))
 
     # Отображение текста правил игры
-    screen.blit(rule1_surface, rule1_rect)
-    screen.blit(rule2_surface, rule2_rect)
-    screen.blit(rule3_surface, rule3_rect)
-    screen.blit(rule4_surface, rule4_rect)
-    screen.blit(rule5_surface, rule5_rect)
+    var.screen.blit(var.rule1_surface, var.rule1_rect)
+    var.screen.blit(var.rule2_surface, var.rule2_rect)
+    var.screen.blit(var.rule3_surface, var.rule3_rect)
+    var.screen.blit(var.rule4_surface, var.rule4_rect)
+    var.screen.blit(var.rule5_surface, var.rule5_rect)
 
     # Обновление дисплея
     pygame.display.flip()
 
     # Ограничение частоты обновления экрана
-    clock.tick(60)
+    var.clock.tick(60)
 
 # Основной цикл
-def run():
+def run(var):
 
-    global running
-    global score
-    global game_over
-    global start_time
-    global text
-    global input_active
-
-    current_time = pygame.time.get_ticks()  # Получение текущего времени
+    var.current_time = pygame.time.get_ticks()  # Получение текущего времени
 
     # Оставшееся время в миллисекундах
-    remaining_time = max(0, game_duration - (pygame.time.get_ticks() - start_time))
+    remaining_time = max(0, var.game_duration - (pygame.time.get_ticks() - var.start_time))
 
     # Преобразование времени в секунды
     remaining_seconds = remaining_time // 1000
 
     # Создание текстового объекта для отображения времени
-    time_text = font.render(f"Time: {remaining_seconds} s", True, (255, 255, 255))
-    time_rect = time_text.get_rect(topright=(SCREEN_WIDTH - 10, 10))  # Позиция времени в верхнем правом углу
+    time_text = var.font.render(f"Time: {remaining_seconds} s", True, (255, 255, 255))
+    time_rect = time_text.get_rect(topright=(var.SCREEN_WIDTH - 10, 10))  # Позиция времени в верхнем правом углу
 
-    if game_over:
-        enemies.empty()
-        text = "Введите имя"  # Сброс поля ввода имени
-        input_active = True  # Включение ввода имени
-        game_over = False
+    if var.game_over:
+        var.enemies.empty()
+        var.text = "Введите имя"  # Сброс поля ввода имени
+        var.input_active = True  # Включение ввода имени
+        var.game_over = False
 
     # Проверка завершения игры
-    if current_time - start_time >= game_duration:
-        if score >= 30:
-            message = "Поздравляем! Вы выиграли!"
-            db_manager.insert_score(text, score) # Вставка результата в базу данных
+    if var.current_time - var.start_time >= var.game_duration:
+        if var.score >= 30:
+            var.message = "Поздравляем! Вы выиграли!"
+            var.db_manager.insert_score(var.text, var.score) # Вставка результата в базу данных
         else:
-            message = "Игра окончена. Вы проиграли."
+            var.message = "Игра окончена. Вы проиграли."
 
         # Получение топ-5 игроков
-        top_players = db_manager.get_top_players()
+        top_players = var.db_manager.get_top_players()
 
-        show_result_message(message, top_players)
+        show_result_message(var.message, top_players)
 
         # Сброс счета и других переменных для начала новой игры
-        score = 0
-        player.rect.centerx = SCREEN_WIDTH // 2
-        player.rect.bottom = SCREEN_HEIGHT - 10
-        start_time = pygame.time.get_ticks()
-        game_over = True
+        var.score = 0
+        var.player.rect.centerx = var.SCREEN_WIDTH // 2
+        var.player.rect.bottom = var.SCREEN_HEIGHT - 10
+        var.start_time = pygame.time.get_ticks()
+        var.game_over = True
 
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
-            running = False
+            var.running = False
 
-        if input_active:
+        if var.input_active:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    input_active = False
+                    var.input_active = False
                 elif event.key == pygame.K_BACKSPACE:
-                    text = text[:-1]
+                    var.text = var.text[:-1]
                 else:
-                    text += event.unicode
+                    var.text += event.unicode
 
         # Обработка клавиш для управления персонажем
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                player.move_left()
+                var.player.move_left()
             elif event.key == pygame.K_RIGHT:
-                player.move_right()
+                var.player.move_right()
             elif event.key == pygame.K_UP:
-                player.move_up()
+                var.player.move_up()
             elif event.key == pygame.K_DOWN:
-                player.move_down()
+                var.player.move_down()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                player.stop()
+                var.player.stop()
         
         # Создание новых врагов
-        if not input_active and random.randrange(100) < 15:
+        if not var.input_active and random.randrange(100) < 15:
             new_enemy = Enemy()
-            enemies.add(new_enemy)  # Добавление врага в группу спрайтов
+            var.enemies.add(new_enemy)  # Добавление врага в группу спрайтов
 
     # Обновление позиции персонажа и врага
-    player.update()
-    enemies.update()
+    var.player.update()
+    var.enemies.update()
 
     # Проверка столкновения с врагами
-    hits = pygame.sprite.spritecollide(player, enemies, True)
+    hits = pygame.sprite.spritecollide(var.player, var.enemies, True)
         
     # Если есть столкновения, увеличьте счет и выведите его
     if hits:
-        score += len(hits)
+        var.score += len(hits)
     
     # Очистка экрана
-    screen.fill((0, 0, 0))
+    var.screen.fill((0, 0, 0))
 
     # Отображение заднего фона
-    screen.blit(background, (0, 0))
+    var.screen.blit(var.background, (0, 0))
 
     # Отображение времени на экране
-    screen.blit(time_text, time_rect)
+    var.screen.blit(time_text, time_rect)
 
     # Отображение персонажа на экране
-    screen.blit(player.image, player.rect)
+    var.screen.blit(var.player.image, var.player.rect)
 
     # Отображение поля ввода имени
-    text_surface = font.render(text, True, (255, 255, 255))
-    input_rect = pygame.Rect(50, 50, 200, 36)  # Позиция и размер поля ввода
-    pygame.draw.rect(screen, (255, 255, 255), input_rect, 2)
-    screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
+    var.text_surface = var.font.render(var.text, True, (255, 255, 255))
+    var.input_rect = pygame.Rect(50, 50, 200, 36)  # Позиция и размер поля ввода
+    pygame.draw.rect(var.screen, (255, 255, 255), var.input_rect, 2)
+    var.screen.blit(var.text_surface, (var.input_rect.x + 5, var.input_rect.y + 5))
 
     # Отображение счета на экране
-    score_text = font.render(f"Счет: {score}", True, (255, 255, 255))
-    screen.blit(score_text, (10, 10))
+    score_text = var.font.render(f"Счет: {var.score}", True, (255, 255, 255))
+    var.screen.blit(score_text, (10, 10))
 
     # Отображение врагов
-    enemies.draw(screen)
+    var.enemies.draw(var.screen)
 
     # Обновление дисплея
     pygame.display.flip()
 
     # Ограничение частоты обновления экрана
-    clock.tick(60)
+    var.clock.tick(60)
 
 pygame.init()
 
-initialize()
+initialize(var)
 
-rulesInit()
+rulesInit(var)
 
-while input_active:
-    waitingForInput()
+while var.input_active:
+    waitingForInput(var)
 
-while running:
-    run()
+while var.running:
+    run(var)
 
 
 # Завершение PyGame

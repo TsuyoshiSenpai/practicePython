@@ -73,8 +73,6 @@ def initialize():
     global SCREEN_HEIGHT
     global running
     global clock
-    global enemies
-    global db_manager
     global font
     global screen
     global start_time
